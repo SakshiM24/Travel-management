@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Available Buses{% endblock %}
+{% block content %}
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Available Buses</h1>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    {% for bus in buses %}
+      <div class="bg-white p-4 rounded shadow-md">
+        <p><strong>Bus No:</strong> {{ bus.bus_number }}</p>
+        <p><strong>Stop:</strong> {{ bus.stop }}</p>
+        <p><strong>Status:</strong> {{ bus.status }}</p>
+        <p><strong>Pickup:</strong> {{ bus.pickup_time }}</p>
+        <p><strong>Drop:</strong> {{ bus.drop_time }}</p>
+      </div>
+    {% empty %}
+      <p>No buses available.</p>
+    {% endfor %}       
+  </div>
+</div>
+{% endblock %}

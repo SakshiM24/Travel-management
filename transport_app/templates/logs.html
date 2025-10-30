@@ -1,0 +1,16 @@
+{% extends 'admin_dashboard.html' %}
+{% block content %}
+<h2>Activity Logs</h2>
+<table border="1" width="100%">
+    <tr><th>Action</th><th>By</th><th>Time</th></tr>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.action }}</td>
+        <td>{{ log.performed_by }}</td>
+        <td>{{ log.timestamp }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" align="center">No logs available.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

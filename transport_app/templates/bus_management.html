@@ -1,0 +1,116 @@
+{% extends 'admin_dashboard.html' %}
+{% load static %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Bus Management</h2>
+
+<!-- Add Bus Form (POST) -->
+<form method="post" class="mb-6">
+  {% csrf_token %}
+  <input type="hidden" name="form_type" value="add_bus">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <input name="bus_no" placeholder="Bus No" class="p-2 border rounded" required>
+    <select name="stop_id" class="p-2 border rounded" required>
+      <option value="">Select stop</option>
+      {% for s in stops %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+    </select>
+    <input type="time" name="pickup_time" class="p-2 border rounded" required>
+    <input type="time" name="drop_time" class="p-2 border rounded" required>
+    <select name="status" class="p-2 border rounded">
+      <option value="Active">Active</option>
+      <option value="Inactive">Inactive</option>
+    </select>
+  </div>
+  <div class="mt-3">
+    <button class="px-4 py-2 bg-green-600 text-white rounded">Add Bus</button>
+  </div>
+</form>
+
+<!-- Buses table -->
+<div class="bg-white shadow rounded">
+  <table class="min-w-full">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-4 py-2 text-left">Bus No</th>
+        <th class="px-4 py-2 text-left">Stop</th>
+        <th class="px-4 py-2 text-left">Pickup</th>
+        <th class="px-4 py-2 text-left">Drop</th>
+        <th class="px-4 py-2 text-left">Status</th>
+        <th class="px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in buses %}
+      <tr class="border-t">
+        <td class="px-4 py-2">{{ b.bus_no }}</td>
+        <td class="px-4 py-2">{{ b.stop.name }}</td>
+        <td class="px-4 py-2">{{ b.pickup_time|time:"g:i A" }}</td>
+        <td class="px-4 py-2">{{ b.drop_time|time:"g:i A" }}</td>
+        <td class="px-4 py-2">{{ b.status }}</td>
+        <td class="px-4 py-2 flex gap-2">
+          <!-- Open Edit modal -->
+          <button type="button" class="px-3 py-1 bg-yellow-500 text-white rounded"
+                  onclick="openEditModal({{ b.id }}, '{{ b.bus_no }}', {{ b.stop.id }}, '{{ b.pickup_time|time:'H:i' }}', '{{ b.drop_time|time:'H:i' }}', '{{ b.status }}')">
+            Edit
+          </button>
+
+          <!-- Delete (POST) -->
+          <form method="post" action="{% url 'delete_bus' b.id %}" onsubmit="return confirm('Delete this bus?');">
+            {% csrf_token %}
+            <button class="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="p-4 text-center">No buses</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- EDIT modal -->
+<div id="editModal" class="fixed inset-0 hidden items-center justify-center bg-black/40">
+  <div class="bg-white p-6 rounded w-96">
+    <h3 class="text-lg mb-3">Edit Bus</h3>
+    <form id="editForm" method="post">
+      {% csrf_token %}
+      <div class="space-y-2">
+        <input name="bus_no" id="edit_bus_no" class="w-full p-2 border rounded" required>
+        <select name="stop_id" id="edit_stop" class="w-full p-2 border rounded" required>
+          <option value="">Select stop</option>
+          {% for s in stops %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+        </select>
+        <input type="time" name="pickup_time" id="edit_pickup_time" class="w-full p-2 border rounded">
+        <input type="time" name="drop_time" id="edit_drop_time" class="w-full p-2 border rounded">
+        <select name="status" id="edit_status" class="w-full p-2 border rounded">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button type="button" onclick="closeEditModal()" class="px-3 py-1 border rounded">Cancel</button>
+        <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEditModal(id, bus_no, stop_id, pickup_time, drop_time, status){
+  document.getElementById('edit_bus_no').value = bus_no;
+  document.getElementById('edit_stop').value = stop_id;
+  document.getElementById('edit_pickup_time').value = pickup_time || '';
+  document.getElementById('edit_drop_time').value = drop_time || '';
+  document.getElementById('edit_status').value = status;
+  const form = document.getElementById('editForm');
+  form.action = '/admin/bus/edit/' + id + '/';   // must match urls.py
+  document.getElementById('editModal').classList.remove('hidden');
+  document.getElementById('editModal').classList.add('flex');
+}
+
+function closeEditModal(){
+  document.getElementById('editModal').classList.remove('flex');
+  document.getElementById('editModal').classList.add('hidden');
+}
+</script>
+
+{% endblock %}
